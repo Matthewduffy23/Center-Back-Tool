@@ -660,7 +660,7 @@ STYLE_MAP = {
     },
     'PAdj Interceptions': {
         'style': 'Cuts out opposition attacks',
-        'sw': 'Defensive positioning',
+        'sw': 'Interceptions',
     },
     'Accurate forward passes, %': {
         'style': None,
@@ -685,10 +685,6 @@ STYLE_MAP = {
     'Accurate passes, %': {
         'style': 'Technical',
         'sw': 'Passing Retention',
-    },
-    'Passes to penalty area per 90': {
-        'style': 'Advanced Playmaker',
-        'sw': 'Passes to Penalty Area',
     },
     'Progressive passes per 90': {
         'style': 'Progressive Passer',
