@@ -86,7 +86,7 @@ FEATURES = [
        'Accurate progressive passes, %', ]
 
 POLAR_METRICS = [
-    "Aerial Duels per 90","Aerial duels won, %", "Defensive duels per 90","Defensive duels won, %","PAdj Interceptions",
+    "Aerial duels per 90","Aerial duels won, %", "Defensive duels per 90","Defensive duels won, %","PAdj Interceptions",
     "Passes per 90","Accurate passes, %","Forward passes per 90", "Progressive passes per 90",
     "Progressive runs per 90","Dribbles per 90",
     
