@@ -1237,8 +1237,8 @@ else:
     # 2) Draw one tight light slab exactly behind the two columns
     SLAB_LEFT   = LEFT
     SLAB_RIGHT  = RIGHT + WIDTH_R
-    SLAB_TOP    = TOP + 0.022                    # small headroom above titles
-    SLAB_BOTTOM = min(def_bottom, pos_bottom) - 0.006  # tiny bottom padding
+    SLAB_TOP    = TOP + 0.025                    # small headroom above titles
+    SLAB_BOTTOM = min(def_bottom, pos_bottom) - 0.009  # tiny bottom padding
 
     fig.patches.append(
         mpatches.Rectangle(
