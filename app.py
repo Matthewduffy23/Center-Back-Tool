@@ -883,7 +883,7 @@ st.dataframe(styled, use_container_width=True)
 # ============== BELOW THE NOTES: 3 EXTRA FEATURE BLOCKS ==============
 # =====================================================================
 
-# ============================ (E) ONE-PAGER — LIGHT REPORT BODY, DARK HEADER ============================
+# ============================ (E) ONE-PAGER — DARK HEADER + LIGHT PANELS (tight slab) ============================
 
 from io import BytesIO
 import numpy as np
@@ -896,12 +896,12 @@ if player_row.empty:
     st.info("Pick a player above.")
 else:
     # --------- palette / tokens ---------
-    PAGE_BG    = "#0a0f1c"   # top header/navy
-    REPORT_BG  = "#ebebeb"   # light report body (under roles -> bottom)
-    PANEL_BG   = "#ebebeb"   # panel background = report bg
-    TRACK_BG   = "#d9d9d9"   # bar "track" slightly darker than panel
-    TEXT_DARK  = "#000000"   # black for titles/labels on light bg
-    TEXT_LIGHT = "#E5E7EB"   # white-ish for top header on navy
+    PAGE_BG    = "#0a0f1c"   # header/navy (top area)
+    PANEL_BG   = "#ebebeb"   # panel background
+    REPORT_BG  = "#ebebeb"   # light slab behind both columns
+    TRACK_BG   = "#d9d9d9"   # bar tracks (slightly darker than panel)
+    TEXT       = "#E5E7EB"   # light text on dark header
+    TEXT_DARK  = "#000000"   # black text for titles/labels on light bg
     ROLE_GREY  = "#737373"
 
     CHIP_G_BG = "#22C55E"; CHIP_R_BG = "#EF4444"; CHIP_B_BG = "#60A5FA"
@@ -917,9 +917,9 @@ else:
         if pd.isna(v): return (0.6,0.63,0.66)
         v = float(v)
         if v <= 50:
-            t = v/50.0;  c1, c2 = np.array([239,68,68]),  np.array([234,179,8])
+            t = v/50.0;  c1, c2 = np.array([239, 68, 68]),  np.array([234, 179, 8])
         else:
-            t = (v-50)/50.0; c1, c2 = np.array([234,179,8]), np.array([34,197,94])
+            t = (v-50)/50.0; c1, c2 = np.array([234, 179, 8]), np.array([34, 197, 94])
         return tuple(((c1 + (c2-c1)*t)/255.0).astype(float))
 
     def _text_width_frac(fig, s, *, fontsize=8, weight="normal"):
@@ -995,7 +995,7 @@ else:
             fig.text(x + pad_x, y - role_h*0.33, r, fontsize=fs, color="#FFFFFF",
                      va="center", ha="left", fontweight="800")
 
-            R,G,B = [int(255*c) for c in div_color_tuple(v)]
+            R, G, B = [int(255*c) for c in div_color_tuple(v)]
             bx = x + role_w + gap
             fig.patches.append(mpatches.FancyBboxPatch((bx, y - num_h*0.78), num_w, num_h,
                               boxstyle=f"round,pad=0.001,rounding_size={num_h*0.25}",
@@ -1047,7 +1047,7 @@ else:
         max_label_w_frac = max(_text_width_frac(fig, s, fontsize=LABEL_FS, weight="bold") for s in labels) if labels else 0
         gutter_w = max_label_w_frac + GUTTER_PAD
 
-        # Panel background (full width)
+        # Panel background
         ax_panel = fig.add_axes([left, bottom, width, ax_h_frac])
         ax_panel.set_facecolor(PANEL_BG)
         ax_panel.set_xticks([]); ax_panel.set_yticks([])
@@ -1091,14 +1091,14 @@ else:
         # midline
         ax.axvline(50, color="#6b7280", linestyle=":", linewidth=1.1, zorder=2)
 
-        # metric labels in gutter (left-aligned) — black on light bg
+        # metric labels in gutter — black on light bg
         for yi, lab in zip(y_idx, labels):
             y_fig = bottom + ax_h_frac * ((yi + 0.5) / max(1, n))
             fig.text(left + GUTTER_PAD/2, y_fig, lab,
                      color=TEXT_DARK, fontsize=LABEL_FS, fontweight="bold",
                      va="center", ha="left")
 
-        # title aligned to the same gutter start — black on light bg
+        # title — black on light bg
         title_y = bottom + ax_h_frac + 0.008
         fig.text(left + GUTTER_PAD/2, title_y, title,
                  color=TEXT_DARK, fontsize=TITLE_FS, fontweight="900", ha="left", va="bottom")
@@ -1167,7 +1167,7 @@ else:
          f"Matches {matches if matches else '—'} — Goals {goals} — xG {xg_total_str} — Assists {assists}", "normal")
     ]
     for txt, weight in runs:
-        fig.text(x_meta, y_meta, txt, color=TEXT_LIGHT, fontsize=13,
+        fig.text(x_meta, y_meta, txt, color=TEXT, fontsize=13,
                  fontweight=("900" if weight == "bold" else "normal"), ha="left", va="center")
         x_meta += _text_width_frac(fig, txt, fontsize=13.5,
                                    weight=("900" if weight == "bold" else "normal")) + (gap if txt.strip() else 0)
@@ -1219,14 +1219,6 @@ else:
         ("Progressive Runs", "Progressive runs per 90"),
     ]: POSSESSION.append((lab, pct_of(met), val_of(met)[1]))
 
-    # ----------------- light report background slab (covers both columns & middle gap) -----------------
-    # Start just above panels so the split between dark header and light report is crisp.
-    REPORT_TOP_Y = 0.70  # slightly above TOP below for a nice buffer
-    fig.patches.append(
-        mpatches.Rectangle((0.0, 0.0), 1.0, REPORT_TOP_Y, transform=fig.transFigure,
-                           facecolor=REPORT_BG, edgecolor="none", zorder=-1)
-    )
-
     # ----------------- layout (wider cards, smaller middle gap) -----------------
     LEFT = 0.050
     WIDTH_L = 0.41
@@ -1237,12 +1229,28 @@ else:
     TOP = 0.66
     V_GAP_FRAC = 0.050
 
-    # Left column
+    # 1) Build panels first to know their exact bottoms
     att_bottom = bar_panel(fig, LEFT, TOP, WIDTH_L, len(ATTACKING), "Attacking",  ATTACKING)
     def_bottom = bar_panel(fig, LEFT, att_bottom - V_GAP_FRAC, WIDTH_L, len(DEFENSIVE), "Defensive", DEFENSIVE)
+    pos_bottom = bar_panel(fig, RIGHT, TOP, WIDTH_R, len(POSSESSION), "Possession", POSSESSION)
 
-    # Right column
-    _ = bar_panel(fig, RIGHT, TOP, WIDTH_R, len(POSSESSION), "Possession", POSSESSION)
+    # 2) Draw one tight light slab exactly behind the two columns
+    SLAB_LEFT   = LEFT
+    SLAB_RIGHT  = RIGHT + WIDTH_R
+    SLAB_TOP    = TOP + 0.022                    # small headroom above titles
+    SLAB_BOTTOM = min(def_bottom, pos_bottom) - 0.006  # tiny bottom padding
+
+    fig.patches.append(
+        mpatches.Rectangle(
+            (SLAB_LEFT, SLAB_BOTTOM),
+            SLAB_RIGHT - SLAB_LEFT,
+            SLAB_TOP - SLAB_BOTTOM,
+            transform=fig.transFigure,
+            facecolor=REPORT_BG,
+            edgecolor="none",
+            zorder=-1
+        )
+    )
 
     # ----------------- render + download -----------------
     st.pyplot(fig, use_container_width=True)
@@ -1253,7 +1261,8 @@ else:
                        file_name=f"{str(player_name).replace(' ','_')}_onepager.png",
                        mime="image/png")
 
-# ============================ END — LIGHT REPORT BODY, DARK HEADER ============================
+# ============================ END — DARK HEADER + LIGHT PANELS (tight slab) ============================
+
 
 
 
