@@ -1234,6 +1234,21 @@ att_bottom = bar_panel(fig, LEFT, TOP, WIDTH_L, len(ATTACKING), "Attacking", ATT
 def_bottom = bar_panel(fig, LEFT, att_bottom - V_GAP_FRAC, WIDTH_L, len(DEFENSIVE), "Defensive", DEFENSIVE)
 pos_bottom = bar_panel(fig, RIGHT, TOP, WIDTH_R, len(POSSESSION), "Possession", POSSESSION)
 
+# ----------------- layout (wider cards, smaller middle gap) -----------------
+LEFT = 0.050
+WIDTH_L = 0.41
+MID_GAP = 0.040
+RIGHT = LEFT + WIDTH_L + MID_GAP
+WIDTH_R = 0.41
+
+TOP = 0.66
+V_GAP_FRAC = 0.050
+
+# 1) Build panels first so we know their actual bottoms
+att_bottom = bar_panel(fig, LEFT, TOP, WIDTH_L, len(ATTACKING), "Attacking", ATTACKING)
+def_bottom = bar_panel(fig, LEFT, att_bottom - V_GAP_FRAC, WIDTH_L, len(DEFENSIVE), "Defensive", DEFENSIVE)
+pos_bottom = bar_panel(fig, RIGHT, TOP, WIDTH_R, len(POSSESSION), "Possession", POSSESSION)
+
 # ----------------- full-width background slab -----------------
 SLAB_LEFT   = 0.0          # start at full figure left
 SLAB_RIGHT  = 1.0          # end at full figure right
