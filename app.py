@@ -883,7 +883,7 @@ st.dataframe(styled, use_container_width=True)
 # ============== BELOW THE NOTES: 3 EXTRA FEATURE BLOCKS ==============
 # =====================================================================
 
-# ============================ (E) ONE-PAGER — WIDER PANELS, SMALLER CENTER GAP, EXTRA TOP-LEFT PADDING ============================
+# ============================ (E) ONE-PAGER — LIGHT REPORT BODY, DARK HEADER ============================
 
 from io import BytesIO
 import numpy as np
@@ -896,18 +896,20 @@ if player_row.empty:
     st.info("Pick a player above.")
 else:
     # --------- palette / tokens ---------
-    PAGE_BG   = "#0a0f1c"
-    PANEL_BG  = "#11161C"
-    TRACK_BG  = "#222c3d"
-    TEXT      = "#E5E7EB"
-    ROLE_GREY = "#737373"
+    PAGE_BG    = "#0a0f1c"   # top header/navy
+    REPORT_BG  = "#ebebeb"   # light report body (under roles -> bottom)
+    PANEL_BG   = "#ebebeb"   # panel background = report bg
+    TRACK_BG   = "#d9d9d9"   # bar "track" slightly darker than panel
+    TEXT_DARK  = "#000000"   # black for titles/labels on light bg
+    TEXT_LIGHT = "#E5E7EB"   # white-ish for top header on navy
+    ROLE_GREY  = "#737373"
 
     CHIP_G_BG = "#22C55E"; CHIP_R_BG = "#EF4444"; CHIP_B_BG = "#60A5FA"
 
     # --------- layout / padding knobs ---------
-    NAME_X   = 0.055   # more breathing room on the left
+    NAME_X   = 0.055
     META_X   = 0.055
-    CHIP_X0  = 0.055   # chips/roles start x
+    CHIP_X0  = 0.055
     GUTTER_PAD  = 0.006
 
     # ----------------- helpers -----------------
@@ -1087,19 +1089,19 @@ else:
         ax.grid(False)
 
         # midline
-        ax.axvline(50, color="#94A3B8", linestyle=":", linewidth=1.2, zorder=2)
+        ax.axvline(50, color="#6b7280", linestyle=":", linewidth=1.1, zorder=2)
 
-        # metric labels in gutter (left-aligned)
+        # metric labels in gutter (left-aligned) — black on light bg
         for yi, lab in zip(y_idx, labels):
             y_fig = bottom + ax_h_frac * ((yi + 0.5) / max(1, n))
             fig.text(left + GUTTER_PAD/2, y_fig, lab,
-                     color=TEXT, fontsize=LABEL_FS, fontweight="bold",
+                     color=TEXT_DARK, fontsize=LABEL_FS, fontweight="bold",
                      va="center", ha="left")
 
-        # title aligned to the same gutter start
+        # title aligned to the same gutter start — black on light bg
         title_y = bottom + ax_h_frac + 0.008
         fig.text(left + GUTTER_PAD/2, title_y, title,
-                 color=TEXT, fontsize=TITLE_FS, fontweight="900", ha="left", va="bottom")
+                 color=TEXT_DARK, fontsize=TITLE_FS, fontweight="900", ha="left", va="bottom")
         ax.plot([0, 1], [1, 1], transform=ax.transAxes, color="#94A3B8", linewidth=0.8, alpha=0.35)
 
         return bottom
@@ -1126,7 +1128,7 @@ else:
     xg_total_str = f"{xg_total:.2f}" if pd.notna(xg_total) else "—"
     assists= int(ply.get("Assists", np.nan)) if pd.notna(ply.get("Assists")) else 0
 
-    # Name + league-adjusted badge
+    # Name + league-adjusted badge (top header stays dark)
     name_fs = 28
     name_text = fig.text(NAME_X, 0.962, f"{player_name}", color="#FFFFFF",
                          fontsize=name_fs, fontweight="900", va="top", ha="left")
@@ -1154,7 +1156,7 @@ else:
         fig.text(badge_x + bw/2, by + bh/2 - 0.0005, f"{int(round(best_val_adj))}",
                  fontsize=18.6, color="#FFFFFF", va="center", ha="center", fontweight="900")
 
-    # Meta row (more left padding)
+    # Meta row (white on dark header)
     x_meta = META_X; y_meta = 0.905; gap = 0.004
     runs = [
         (f"{pos} — ", "normal"),
@@ -1165,13 +1167,13 @@ else:
          f"Matches {matches if matches else '—'} — Goals {goals} — xG {xg_total_str} — Assists {assists}", "normal")
     ]
     for txt, weight in runs:
-        fig.text(x_meta, y_meta, txt, color="#FFFFFF", fontsize=13,
+        fig.text(x_meta, y_meta, txt, color=TEXT_LIGHT, fontsize=13,
                  fontweight=("900" if weight == "bold" else "normal"), ha="left", va="center")
         x_meta += _text_width_frac(fig, txt, fontsize=13.5,
                                    weight=("900" if weight == "bold" else "normal")) + (gap if txt.strip() else 0)
 
-    # ----------------- chips + roles -----------------
-    y = 0.868  # a touch lower to create more breathing room under meta
+    # ----------------- chips + roles (still in dark header) -----------------
+    y = 0.868
     y = chip_row_exact(fig, strengths or [],  y, CHIP_G_BG, fs=10.1, max_per_row=5)
     y = chip_row_exact(fig, weaknesses or [], y, CHIP_R_BG, fs=10.1, max_per_row=5)
     y = chip_row_exact(fig, styles or [],     y, CHIP_B_BG, fs=10.1, max_per_row=5)
@@ -1217,6 +1219,14 @@ else:
         ("Progressive Runs", "Progressive runs per 90"),
     ]: POSSESSION.append((lab, pct_of(met), val_of(met)[1]))
 
+    # ----------------- light report background slab (covers both columns & middle gap) -----------------
+    # Start just above panels so the split between dark header and light report is crisp.
+    REPORT_TOP_Y = 0.70  # slightly above TOP below for a nice buffer
+    fig.patches.append(
+        mpatches.Rectangle((0.0, 0.0), 1.0, REPORT_TOP_Y, transform=fig.transFigure,
+                           facecolor=REPORT_BG, edgecolor="none", zorder=-1)
+    )
+
     # ----------------- layout (wider cards, smaller middle gap) -----------------
     LEFT = 0.050
     WIDTH_L = 0.41
@@ -1243,7 +1253,8 @@ else:
                        file_name=f"{str(player_name).replace(' ','_')}_onepager.png",
                        mime="image/png")
 
-# ============================ END — WIDER PANELS, SMALLER CENTER GAP, EXTRA TOP-LEFT PADDING ============================
+# ============================ END — LIGHT REPORT BODY, DARK HEADER ============================
+
 
 
 # ----------------- (A) SCATTERPLOT — Goals vs xG -----------------
