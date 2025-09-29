@@ -883,7 +883,7 @@ st.dataframe(styled, use_container_width=True)
 # ============== BELOW THE NOTES: 3 EXTRA FEATURE BLOCKS ==============
 # =====================================================================
 
-# ============================ (E) ONE-PAGER — DARK HEADER + LIGHT PANELS (tight slab) ============================
+# ============================ (E) ONE-PAGER — WIDER PANELS, SMALLER CENTER GAP, EXTRA TOP-LEFT PADDING ============================
 
 from io import BytesIO
 import numpy as np
@@ -896,20 +896,18 @@ if player_row.empty:
     st.info("Pick a player above.")
 else:
     # --------- palette / tokens ---------
-    PAGE_BG    = "#0a0f1c"   # header/navy (top area)
-    PANEL_BG   = "#ebebeb"   # panel background
-    REPORT_BG  = "#ebebeb"   # light slab behind both columns
-    TRACK_BG   = "#d9d9d9"   # bar tracks (slightly darker than panel)
-    TEXT       = "#E5E7EB"   # light text on dark header
-    TEXT_DARK  = "#000000"   # black text for titles/labels on light bg
-    ROLE_GREY  = "#737373"
+    PAGE_BG   = "#0a0f1c"
+    PANEL_BG  = "#11161C"
+    TRACK_BG  = "#222c3d"
+    TEXT      = "#E5E7EB"
+    ROLE_GREY = "#737373"
 
     CHIP_G_BG = "#22C55E"; CHIP_R_BG = "#EF4444"; CHIP_B_BG = "#60A5FA"
 
     # --------- layout / padding knobs ---------
-    NAME_X   = 0.055
+    NAME_X   = 0.055   # more breathing room on the left
     META_X   = 0.055
-    CHIP_X0  = 0.055
+    CHIP_X0  = 0.055   # chips/roles start x
     GUTTER_PAD  = 0.006
 
     # ----------------- helpers -----------------
@@ -917,9 +915,9 @@ else:
         if pd.isna(v): return (0.6,0.63,0.66)
         v = float(v)
         if v <= 50:
-            t = v/50.0;  c1, c2 = np.array([239, 68, 68]),  np.array([234, 179, 8])
+            t = v/50.0;  c1, c2 = np.array([239,68,68]),  np.array([234,179,8])
         else:
-            t = (v-50)/50.0; c1, c2 = np.array([234, 179, 8]), np.array([34, 197, 94])
+            t = (v-50)/50.0; c1, c2 = np.array([234,179,8]), np.array([34,197,94])
         return tuple(((c1 + (c2-c1)*t)/255.0).astype(float))
 
     def _text_width_frac(fig, s, *, fontsize=8, weight="normal"):
@@ -995,7 +993,7 @@ else:
             fig.text(x + pad_x, y - role_h*0.33, r, fontsize=fs, color="#FFFFFF",
                      va="center", ha="left", fontweight="800")
 
-            R, G, B = [int(255*c) for c in div_color_tuple(v)]
+            R,G,B = [int(255*c) for c in div_color_tuple(v)]
             bx = x + role_w + gap
             fig.patches.append(mpatches.FancyBboxPatch((bx, y - num_h*0.78), num_w, num_h,
                               boxstyle=f"round,pad=0.001,rounding_size={num_h*0.25}",
@@ -1047,7 +1045,7 @@ else:
         max_label_w_frac = max(_text_width_frac(fig, s, fontsize=LABEL_FS, weight="bold") for s in labels) if labels else 0
         gutter_w = max_label_w_frac + GUTTER_PAD
 
-        # Panel background
+        # Panel background (full width)
         ax_panel = fig.add_axes([left, bottom, width, ax_h_frac])
         ax_panel.set_facecolor(PANEL_BG)
         ax_panel.set_xticks([]); ax_panel.set_yticks([])
@@ -1089,19 +1087,19 @@ else:
         ax.grid(False)
 
         # midline
-        ax.axvline(50, color="#6b7280", linestyle=":", linewidth=1.1, zorder=2)
+        ax.axvline(50, color="#94A3B8", linestyle=":", linewidth=1.2, zorder=2)
 
-        # metric labels in gutter — black on light bg
+        # metric labels in gutter (left-aligned)
         for yi, lab in zip(y_idx, labels):
             y_fig = bottom + ax_h_frac * ((yi + 0.5) / max(1, n))
             fig.text(left + GUTTER_PAD/2, y_fig, lab,
-                     color=TEXT_DARK, fontsize=LABEL_FS, fontweight="bold",
+                     color=TEXT, fontsize=LABEL_FS, fontweight="bold",
                      va="center", ha="left")
 
-        # title — black on light bg
+        # title aligned to the same gutter start
         title_y = bottom + ax_h_frac + 0.008
         fig.text(left + GUTTER_PAD/2, title_y, title,
-                 color=TEXT_DARK, fontsize=TITLE_FS, fontweight="900", ha="left", va="bottom")
+                 color=TEXT, fontsize=TITLE_FS, fontweight="900", ha="left", va="bottom")
         ax.plot([0, 1], [1, 1], transform=ax.transAxes, color="#94A3B8", linewidth=0.8, alpha=0.35)
 
         return bottom
@@ -1128,7 +1126,7 @@ else:
     xg_total_str = f"{xg_total:.2f}" if pd.notna(xg_total) else "—"
     assists= int(ply.get("Assists", np.nan)) if pd.notna(ply.get("Assists")) else 0
 
-    # Name + league-adjusted badge (top header stays dark)
+    # Name + league-adjusted badge
     name_fs = 28
     name_text = fig.text(NAME_X, 0.962, f"{player_name}", color="#FFFFFF",
                          fontsize=name_fs, fontweight="900", va="top", ha="left")
@@ -1156,7 +1154,7 @@ else:
         fig.text(badge_x + bw/2, by + bh/2 - 0.0005, f"{int(round(best_val_adj))}",
                  fontsize=18.6, color="#FFFFFF", va="center", ha="center", fontweight="900")
 
-    # Meta row (white on dark header)
+    # Meta row (more left padding)
     x_meta = META_X; y_meta = 0.905; gap = 0.004
     runs = [
         (f"{pos} — ", "normal"),
@@ -1167,13 +1165,13 @@ else:
          f"Matches {matches if matches else '—'} — Goals {goals} — xG {xg_total_str} — Assists {assists}", "normal")
     ]
     for txt, weight in runs:
-        fig.text(x_meta, y_meta, txt, color=TEXT, fontsize=13,
+        fig.text(x_meta, y_meta, txt, color="#FFFFFF", fontsize=13,
                  fontweight=("900" if weight == "bold" else "normal"), ha="left", va="center")
         x_meta += _text_width_frac(fig, txt, fontsize=13.5,
                                    weight=("900" if weight == "bold" else "normal")) + (gap if txt.strip() else 0)
 
-    # ----------------- chips + roles (still in dark header) -----------------
-    y = 0.868
+    # ----------------- chips + roles -----------------
+    y = 0.868  # a touch lower to create more breathing room under meta
     y = chip_row_exact(fig, strengths or [],  y, CHIP_G_BG, fs=10.1, max_per_row=5)
     y = chip_row_exact(fig, weaknesses or [], y, CHIP_R_BG, fs=10.1, max_per_row=5)
     y = chip_row_exact(fig, styles or [],     y, CHIP_B_BG, fs=10.1, max_per_row=5)
@@ -1219,79 +1217,33 @@ else:
         ("Progressive Runs", "Progressive runs per 90"),
     ]: POSSESSION.append((lab, pct_of(met), val_of(met)[1]))
 
-# ----------------- layout (wider cards, smaller middle gap) -----------------
-LEFT = 0.050
-WIDTH_L = 0.41
-MID_GAP = 0.040
-RIGHT = LEFT + WIDTH_L + MID_GAP
-WIDTH_R = 0.41
+    # ----------------- layout (wider cards, smaller middle gap) -----------------
+    LEFT = 0.050
+    WIDTH_L = 0.41
+    MID_GAP = 0.040
+    RIGHT = LEFT + WIDTH_L + MID_GAP
+    WIDTH_R = 0.41
 
-TOP = 0.66
-V_GAP_FRAC = 0.050
+    TOP = 0.66
+    V_GAP_FRAC = 0.050
 
-# 1) Build panels first so we know their actual bottoms
-att_bottom = bar_panel(fig, LEFT, TOP, WIDTH_L, len(ATTACKING), "Attacking", ATTACKING)
-def_bottom = bar_panel(fig, LEFT, att_bottom - V_GAP_FRAC, WIDTH_L, len(DEFENSIVE), "Defensive", DEFENSIVE)
-pos_bottom = bar_panel(fig, RIGHT, TOP, WIDTH_R, len(POSSESSION), "Possession", POSSESSION)
+    # Left column
+    att_bottom = bar_panel(fig, LEFT, TOP, WIDTH_L, len(ATTACKING), "Attacking",  ATTACKING)
+    def_bottom = bar_panel(fig, LEFT, att_bottom - V_GAP_FRAC, WIDTH_L, len(DEFENSIVE), "Defensive", DEFENSIVE)
 
-# ----------------- layout (wider cards, smaller middle gap) -----------------
-LEFT = 0.050
-WIDTH_L = 0.41
-MID_GAP = 0.040
-RIGHT = LEFT + WIDTH_L + MID_GAP
-WIDTH_R = 0.41
+    # Right column
+    _ = bar_panel(fig, RIGHT, TOP, WIDTH_R, len(POSSESSION), "Possession", POSSESSION)
 
-TOP = 0.66
-V_GAP_FRAC = 0.050
+    # ----------------- render + download -----------------
+    st.pyplot(fig, use_container_width=True)
+    buf = BytesIO()
+    fig.savefig(buf, format="png", dpi=170, bbox_inches="tight", facecolor=fig.get_facecolor())
+    st.download_button("⬇️ Download one-pager (PNG)",
+                       data=buf.getvalue(),
+                       file_name=f"{str(player_name).replace(' ','_')}_onepager.png",
+                       mime="image/png")
 
-# 1) Build panels first so we know their actual bottoms
-att_bottom = bar_panel(fig, LEFT, TOP, WIDTH_L, len(ATTACKING), "Attacking", ATTACKING)
-def_bottom = bar_panel(fig, LEFT, att_bottom - V_GAP_FRAC, WIDTH_L, len(DEFENSIVE), "Defensive", DEFENSIVE)
-pos_bottom = bar_panel(fig, RIGHT, TOP, WIDTH_R, len(POSSESSION), "Possession", POSSESSION)
-
-# ----------------- layout (wider cards, smaller middle gap) -----------------
-LEFT = 0.050
-WIDTH_L = 0.41
-MID_GAP = 0.040
-RIGHT = LEFT + WIDTH_L + MID_GAP
-WIDTH_R = 0.41
-
-TOP = 0.66
-V_GAP_FRAC = 0.050
-
-# 1) Build panels first so we know their actual bottoms
-att_bottom = bar_panel(fig, LEFT, TOP, WIDTH_L, len(ATTACKING), "Attacking", ATTACKING)
-def_bottom = bar_panel(fig, LEFT, att_bottom - V_GAP_FRAC, WIDTH_L, len(DEFENSIVE), "Defensive", DEFENSIVE)
-pos_bottom = bar_panel(fig, RIGHT, TOP, WIDTH_R, len(POSSESSION), "Possession", POSSESSION)
-
-# ----------------- full-width background slab -----------------
-SLAB_LEFT   = 0.0          # start at full figure left
-SLAB_RIGHT  = 1.0          # end at full figure right
-SLAB_TOP    = TOP + 0.05   # a little above the panel titles
-SLAB_BOTTOM = min(def_bottom, pos_bottom)  # no padding below panels
-
-fig.patches.append(
-    mpatches.Rectangle(
-        (SLAB_LEFT, SLAB_BOTTOM),
-        SLAB_RIGHT - SLAB_LEFT,
-        SLAB_TOP - SLAB_BOTTOM,
-        transform=fig.transFigure,
-        facecolor="#ebebeb",   # light grey slab background
-        edgecolor="none",
-        zorder=-1
-    )
-)
-
-# ----------------- render + download -----------------
-st.pyplot(fig, use_container_width=True)
-buf = BytesIO()
-fig.savefig(buf, format="png", dpi=170, bbox_inches="tight", facecolor=fig.get_facecolor())
-st.download_button(
-    "⬇️ Download one-pager (PNG)",
-    data=buf.getvalue(),
-    file_name=f"{str(player_name).replace(' ','_')}_onepager.png",
-    mime="image/png"
-)
+# ============================ END — WIDER PANELS, SMALLER CENTER GAP, EXTRA TOP-LEFT PADDING ============================
 
 
 
