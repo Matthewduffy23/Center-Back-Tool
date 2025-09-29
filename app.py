@@ -1234,23 +1234,29 @@ else:
     def_bottom = bar_panel(fig, LEFT, att_bottom - V_GAP_FRAC, WIDTH_L, len(DEFENSIVE), "Defensive", DEFENSIVE)
     pos_bottom = bar_panel(fig, RIGHT, TOP, WIDTH_R, len(POSSESSION), "Possession", POSSESSION)
 
-    # 2) Draw one tight light slab exactly behind the two columns
-    SLAB_LEFT   = LEFT
-    SLAB_RIGHT  = RIGHT + WIDTH_R
-    SLAB_TOP    = TOP + 0.04                    # small headroom above titles
-    SLAB_BOTTOM = min(def_bottom, pos_bottom) - 0  # tiny bottom padding
+# current (tight to panels)
+SLAB_LEFT   = LEFT
+SLAB_RIGHT  = RIGHT + WIDTH_R
 
-    fig.patches.append(
-        mpatches.Rectangle(
-            (SLAB_LEFT, SLAB_BOTTOM),
-            SLAB_RIGHT - SLAB_LEFT,
-            SLAB_TOP - SLAB_BOTTOM,
-            transform=fig.transFigure,
-            facecolor=REPORT_BG,
-            edgecolor="none",
-            zorder=-1
-        )
+# 👉 full-width slab
+SLAB_LEFT   = 0.0
+SLAB_RIGHT  = 1.0
+
+SLAB_TOP    = TOP + 0.05
+SLAB_BOTTOM = min(def_bottom, pos_bottom) - 0
+
+fig.patches.append(
+    mpatches.Rectangle(
+        (SLAB_LEFT, SLAB_BOTTOM),
+        SLAB_RIGHT - SLAB_LEFT,      # = 1.0
+        SLAB_TOP - SLAB_BOTTOM,
+        transform=fig.transFigure,
+        facecolor=REPORT_BG,          # "#ebebeb"
+        edgecolor="none",
+        zorder=-1
     )
+)
+
 
     # ----------------- render + download -----------------
     st.pyplot(fig, use_container_width=True)
