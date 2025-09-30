@@ -1276,7 +1276,7 @@ else:
         ("Defensive Duel %", "Defensive duels won, %"),
         ("PAdj Interceptions", "PAdj Interceptions"),
         ("Shots Blocked", "Shots blocked per 90"),
-        ("Successful Defensive Actions", "Successful defensive actions per 90"),
+        ("Successful Def. Actions", "Successful defensive actions per 90"),
     ]:
         DEFENSIVE.append((lab, float(np.nan_to_num(pct_of(met), nan=0.0)), val_of(met)[1]))
 
